@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 119
+# Migrations générées par Django : non éditées à la main.
+exclude = .venv,migrations,__pycache__

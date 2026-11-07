@@ -1,0 +1,7 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "strict",
+  "extraPaths": ["p10"],
+  "include": ["p10"]
+}
