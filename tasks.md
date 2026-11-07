@@ -1,8 +1,18 @@
-- [] User, hérité de AbstractUser
-- [] UserSerializer
-- [] UserAPIView
-- [] Contributor
-- [] Project
-- [] Issue
-- [] Comment
+- [x] User, hérité de AbstractUser
+- [x] UserSerializer
+- [x] UserAPIView
+- [x] Contributor
+- [x] Project
+- [x] Issue
+- [x] Comment
 
+- [x] Serializers Project, Issue, Comment, Contributor
+- [ ] Authentification JWT (simplejwt)
+- [ ] Vues et URLs Project (auteur + contributeur automatiques)
+- [ ] Vues et URLs Contributor
+- [ ] Vues et URLs Issue
+- [ ] Vues et URLs Comment
+- [ ] Permissions : seuls les contributeurs accèdent au projet
+- [ ] Permissions : seul l'auteur modifie ou supprime
+- [ ] Pagination
+- [ ] Tests Postman

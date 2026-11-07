@@ -1,3 +1,125 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from datetime import datetime
+from uuid import uuid4, UUID
+from django.conf import settings
 from django.db import models
 
-# Create your models here.
+if TYPE_CHECKING:
+    from authentication.models import User
+
+
+class Project(models.Model):
+    class TypeTag(models.TextChoices):
+        BACK_END = "BACK_END", "Back-end"
+        FRONT_END = "FRONT_END", "Front-end"
+        IOS = ("IOS", "iOS")
+        ANDROID = "ANDROID", "Android"
+
+    author: models.ForeignKey[User, User] = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="projects",
+    )
+    name: models.CharField[str, str] = models.CharField(max_length=150)
+    description: models.TextField[str, str] = models.TextField()
+    project_type: models.CharField[str, str] = models.CharField(
+        choices=TypeTag.choices,
+        max_length=20,
+        default=TypeTag.BACK_END,
+    )
+    created_time: models.DateTimeField[datetime, datetime] = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class Issue(models.Model):
+    class TypeTag(models.TextChoices):
+        BUG = "BUG", "Bug"
+        TASK = "TASK", "Tâche"
+        IMPROVEMENT = "FEATUR", "Fonctionnalité"
+
+    class PriorityTag(models.TextChoices):
+        HIGH = "HIGH", "Haute"
+        MEDIUM = "MEDIUM", "Moyenne"
+        LOW = "LOW", "Faible"
+
+    class StatusTag(models.TextChoices):
+        TO_DO = "TO_DO", "A faire"
+        FINISHED = "FINISHED", "Terminée"
+        IN_PROGRESS = "IN_PROGRESS", "EN cours"
+
+    author: models.ForeignKey[User, User] = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="issues",
+    )
+    project: models.ForeignKey[Project, Project] = models.ForeignKey(
+        to=Project, on_delete=models.CASCADE, related_name="issues"
+    )
+    name: models.CharField[str, str] = models.CharField(max_length=150)
+    description: models.TextField[str, str] = models.TextField()
+    status: models.CharField[str, str] = models.CharField(
+        choices=StatusTag.choices,
+        max_length=20,
+        default=StatusTag.TO_DO,
+    )
+    priority: models.CharField[str, str] = models.CharField(
+        choices=PriorityTag.choices,
+        max_length=20,
+        default=PriorityTag.LOW,
+    )
+    assigned_to: models.ForeignKey[User, User] = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="assigned_issues",
+        null=True,
+        blank=True,
+    )
+    issue_type: models.CharField[str, str] = models.CharField(
+        choices=TypeTag.choices,
+        max_length=20,
+        default=TypeTag.BUG,
+    )
+    created_time: models.DateTimeField[datetime, datetime] = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class Comment(models.Model):
+    id: models.UUIDField[UUID, UUID] = models.UUIDField(
+        primary_key=True, default=uuid4, editable=False
+    )
+    author: models.ForeignKey[User, User] = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    issue: models.ForeignKey[Issue, Issue] = models.ForeignKey(
+        to=Issue, on_delete=models.CASCADE, related_name="comments"
+    )
+    description: models.TextField[str, str] = models.TextField()
+    created_time: models.DateTimeField[datetime, datetime] = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+class Contributor(models.Model):
+    user: models.ForeignKey[User, User] = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="contributions",
+    )
+    project: models.ForeignKey[Project, Project] = models.ForeignKey(
+        to=Project,
+        on_delete=models.CASCADE,
+        related_name="contributors",
+    )
+    created_time: models.DateTimeField[datetime, datetime] = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        unique_together = ("user", "project")
