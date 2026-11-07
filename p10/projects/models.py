@@ -39,7 +39,7 @@ class Issue(models.Model):
     class TypeTag(models.TextChoices):
         BUG = "BUG", "Bug"
         TASK = "TASK", "Tâche"
-        IMPROVEMENT = "FEATUR", "Fonctionnalité"
+        FEATURE = "FEATURE", "Fonctionnalité"
 
     class PriorityTag(models.TextChoices):
         HIGH = "HIGH", "Haute"
