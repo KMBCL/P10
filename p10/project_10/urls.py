@@ -14,14 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework import routers
+
+from authentication.view import UserAPIView, UserViewset
+
+router = routers.SimpleRouter()
+router.register("user", UserViewset, basename="user")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     # Login/logout de l'API navigable DRF.
-    path('api-auth/', include('rest_framework.urls')),
+    path("api-auth/", include("rest_framework.urls")),
+    # path("api/user/", UserAPIView.as_view()),
+    path("api/", include(router.urls)),
 ]
 
 # Routes de la toolbar : ajoutées seulement si DEBUG = True.

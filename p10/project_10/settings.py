@@ -108,6 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -115,7 +116,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+        # Lettres + chiffres + spéciaux : aucun validateur natif ne le couvre.
+        'NAME': 'authentication.validators.PasswordCompositionValidator',
+    },
 ]
+
+# User personnalisé : doit être défini avant la première migration.
+AUTH_USER_MODEL: str = 'authentication.User'
 
 
 # Internationalization
