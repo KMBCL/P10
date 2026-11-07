@@ -18,19 +18,12 @@ Including another URLconf
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework import routers
-
-from authentication.view import UserAPIView, UserViewset
-
-router = routers.SimpleRouter()
-router.register("user", UserViewset, basename="user")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Login/logout de l'API navigable DRF.
     path("api-auth/", include("rest_framework.urls")),
-    # path("api/user/", UserAPIView.as_view()),
-    path("api/", include(router.urls)),
+    path("api/", include("authentication.urls")),
     path("api/", include("projects.urls")),
 ]
 
