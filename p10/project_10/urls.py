@@ -31,6 +31,7 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),
     # path("api/user/", UserAPIView.as_view()),
     path("api/", include(router.urls)),
+    path("api/", include("projects.urls")),
 ]
 
 # Routes de la toolbar : ajoutées seulement si DEBUG = True.
