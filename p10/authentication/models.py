@@ -6,6 +6,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.expressions import Combinable
 
+from authentication.constants import MIN_ALLOWED_AGE, MIN_AWALLOWED_AGE_ERROR_MESSAGE
+
 
 class User(AbstractUser):
     """Utilisateur SoftDesk : identifiants natifs + âge et consentements RGPD."""
@@ -16,12 +18,18 @@ class User(AbstractUser):
         validators=[UnicodeUsernameValidator()],
     )
     # RGPD : inscription interdite aux 15 ans et moins.
-    age: models.PositiveIntegerField[int | Combinable, int] = models.PositiveIntegerField(
-        validators=[MinValueValidator(16)],
+    age: models.PositiveIntegerField[int | Combinable, int] = (
+        models.PositiveIntegerField(
+            validators=[MinValueValidator(MIN_ALLOWED_AGE)],
+        )
     )
     # Consentements explicites : False tant que l'utilisateur ne les donne pas.
-    can_be_contacted: models.BooleanField[bool | Combinable, bool] = models.BooleanField(default=False)
-    can_data_be_shared: models.BooleanField[bool | Combinable, bool] = models.BooleanField(default=False)
+    can_be_contacted: models.BooleanField[bool | Combinable, bool] = (
+        models.BooleanField(default=False)
+    )
+    can_data_be_shared: models.BooleanField[bool | Combinable, bool] = (
+        models.BooleanField(default=False)
+    )
 
     # Demandés par createsuperuser : age n'a pas de valeur par défaut.
-    REQUIRED_FIELDS: ClassVar[list[str]] = ['email', 'age']
+    REQUIRED_FIELDS: ClassVar[list[str]] = ["email", "age"]
