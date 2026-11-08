@@ -15,16 +15,16 @@
 
 ## Base de données
 
-- [ ] Corriger la valeur "FEATUR" de Issue.TypeTag.IMPROVEMENT (avant migration)
-- [ ] makemigrations projects + migrate
-- [ ] Vérifier dans l'admin ou le shell que les objets se créent correctement
+- [x] Corriger la valeur "FEATUR" de Issue.TypeTag.IMPROVEMENT (avant migration)
+- [x] makemigrations projects + migrate
+- [x] Vérifier dans l'admin ou le shell que les objets se créent correctement
 
 ## Authentification JWT
 
-- [ ] Installer djangorestframework-simplejwt (+ requirements)
-- [ ] Configurer DEFAULT_AUTHENTICATION_CLASSES (JWTAuthentication)
-- [ ] Routes token/ (obtention) et token/refresh/
-- [ ] Régler la durée de vie des tokens (SIMPLE_JWT)
+- [x] Installer djangorestframework-simplejwt (+ requirements)
+- [x] Configurer DEFAULT_AUTHENTICATION_CLASSES (JWTAuthentication)
+- [x] Routes token/ (obtention) et token/refresh/
+- [x] Régler la durée de vie des tokens (SIMPLE_JWT)
 
 ## Utilisateurs / RGPD
 
@@ -70,7 +70,7 @@
 
 ## Qualité et livraison
 
-- [ ] Fichier requirements.txt ou Pipfile à jour
+- [x] Fichier requirements.txt ou Pipfile à jour
 - [ ] README : installation, lancement, endpoints
 - [ ] flake8 et Pyright sans erreur
 - [ ] Collection Postman couvrant tous les endpoints (cas autorisés et refusés)
