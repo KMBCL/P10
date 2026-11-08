@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.expressions import Combinable
 
-from authentication.constants import MIN_ALLOWED_AGE, MIN_AWALLOWED_AGE_ERROR_MESSAGE
+from authentication.constants import MIN_ALLOWED_AGE
 
 
 class User(AbstractUser):

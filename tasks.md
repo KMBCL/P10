@@ -3,7 +3,7 @@
 - [x] User, hérité de AbstractUser (age >= 16, can_be_contacted, can_data_be_shared)
 - [x] Validateur de mot de passe personnalisé
 - [x] UserSerializer
-- [x] UserAPIView / UserViewset (lecture seule)
+- [x] UserViewset (ModelViewSet : CRUD complet, à restreindre par permissions)
 - [x] Migrations authentication
 - [x] Modèles Project, Issue, Comment (UUID), Contributor (unique user/projet)
 - [x] Serializers Project, Issue, Comment, Contributor
@@ -28,13 +28,27 @@
 
 ## Utilisateurs / RGPD
 
-- [ ] Inscription : création de compte accessible sans être connecté (AllowAny)
-- [ ] Mot de passe en write_only et hashé (set_password / create_user)
-- [ ] Refuser l'inscription des moins de 16 ans (validation côté serializer)
+- [x] Inscription : création de compte accessible sans être connecté (AllowAny via get_permissions)
+- [x] Mot de passe en write_only et hashé à la création (create_user)
+- [ ] Mot de passe hashé aussi en modification (update() du serializer : set_password)
+- [ ] Appliquer AUTH_PASSWORD_VALIDATORS à l'inscription (validate_password dans le serializer)
+- [x] Refuser l'inscription des moins de 16 ans (MinValueValidator du modèle, repris par le serializer)
+- [ ] Message d'erreur personnalisé pour l'âge (constante dans constants.py)
 - [ ] Un utilisateur peut consulter et modifier son propre profil (consentements inclus)
 - [ ] Droit à l'oubli : un utilisateur peut supprimer son compte (et ses données)
-- [ ] Un utilisateur ne peut pas modifier ou supprimer le compte d'un autre
-- [ ] Ne pas exposer de données sensibles dans les listes d'utilisateurs
+- [x] Un utilisateur ne peut pas modifier ou supprimer le compte d'un autre (IsSelf, has_object_permission → 403)
+- [x] Liste complète des utilisateurs bloquée : list renvoie none() sans ?username= (get_queryset restreint à l'action list)
+- [ ] Ne pas exposer de données sensibles dans la recherche ?username= (serializer allégé : id, username)
+
+## Dette technique (à corriger)
+
+- [x] ImportError : MIN_AWALLOWED_AGE_ERROR_MESSAGE importé mais absent de constants.py (import retiré)
+- [ ] Remplacer l'import privé _SupportsHasPermission par un Protocol local
+- [x] Supprimer les imports inutilisés de view.py
+- [ ] Supprimer les imports inutilisés (projects/admin.py, projects/tests.py)
+- [ ] flake8 E501 : permissions.py:9 (signature de has_object_permission à couper)
+- [ ] Pyright : "Meta overrides symbol" sur les 5 serializers (configuration ou ignore)
+- [ ] Pyright : typage de perform_create (BaseSerializer[Any] ou ignore ciblé)
 
 ## Contributors
 
@@ -59,7 +73,8 @@
 - [ ] Issues : seul l'auteur peut modifier ou supprimer
 - [ ] Comments : seuls les contributeurs du projet peuvent lire et créer
 - [ ] Comments : seul l'auteur peut modifier ou supprimer
-- [ ] Écrire les classes de permission dans un fichier permissions.py (has_permission / has_object_permission)
+- [x] Fichier authentication/permissions.py créé (IsSelf) : mécanisme has_permission / has_object_permission compris
+- [ ] Permissions projects : IsAuthor, IsContributor (même mécanisme)
 
 ## Green code / performance
 
