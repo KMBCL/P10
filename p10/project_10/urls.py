@@ -25,12 +25,12 @@ urlpatterns = [
     # vue récupération token
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    # vue admin
-    path("admin/", admin.site.urls),
     # Login/logout de l'API navigable DRF.
     path("api-auth/", include("rest_framework.urls")),
     path("api/", include("authentication.urls")),
     path("api/", include("projects.urls")),
+    # vue admin
+    path("admin/", admin.site.urls),
 ]
 
 # Routes de la toolbar : ajoutées seulement si DEBUG = True.
