@@ -17,6 +17,7 @@ class UserSerializer(ModelSerializer[User]):
             "can_be_contacted",
             "can_data_be_shared",
         ]
+        read_only_fields = ["id"]
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data: dict[str, Any]) -> User:

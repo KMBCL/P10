@@ -16,6 +16,7 @@ class ProjectSerializer(ModelSerializer[Project]):
             "created_time",
         ]
         read_only_fields = [
+            "id",
             "author",
             "created_time",
         ]

@@ -21,7 +21,7 @@ class IssueSerializer(ModelSerializer[Issue]):
             "assigned_to",
             "created_time",
         ]
-        read_only_fields = ["author", "created_time"]
+        read_only_fields = ["id", "author", "created_time"]
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Seuls les contributeurs du projet peuvent se voir assigner l'issue."""

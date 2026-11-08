@@ -15,4 +15,4 @@ class ContributorSerializer(ModelSerializer[Contributor]):
             "project",
             "created_time",
         ]
-        read_only_fields = ["created_time"]
+        read_only_fields = ["id", "created_time"]
