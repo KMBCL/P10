@@ -5,11 +5,12 @@ from typing import TYPE_CHECKING
 
 from django.db.models.query import QuerySet
 from rest_framework.permissions import AllowAny
+from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
 from authentication.models import User
-from authentication.serializers import UserSerializer
+from authentication.serializers import UserSerializer, UserListSerializer
 from authentication.permissions import IsSelf
 
 if TYPE_CHECKING:
@@ -18,10 +19,10 @@ if TYPE_CHECKING:
 
 class UserViewset(ModelViewSet[User]):
 
-    serializer_class = UserSerializer
-
-    # def get_queryset(self) -> QuerySet[User, User]:
-    #     return User.objects.all()
+    def get_serializer_class(self) -> type[BaseSerializer[User]]:
+        if self.action == "list":
+            return UserListSerializer
+        return UserSerializer
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action == "create":

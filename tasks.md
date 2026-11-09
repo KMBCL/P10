@@ -35,10 +35,11 @@
 - [x] Refuser l'inscription des moins de 16 ans (MinValueValidator du modèle, repris par le serializer)
 - [ ] Message d'erreur personnalisé pour l'âge (constante dans constants.py)
 - [x] Un utilisateur peut consulter et modifier son propre profil (consentements inclus)
-- [ ] Droit à l'oubli : un utilisateur peut supprimer son compte (et ses données)
+- [x] Droit à l'oubli : un utilisateur peut supprimer son compte et ses données (destroy du ModelViewSet + on_delete CASCADE)
+- [ ] (optionnel) Anonymiser au lieu de supprimer, pour conserver les contributions des autres sur ses projets
 - [x] Un utilisateur ne peut pas modifier ou supprimer le compte d'un autre (IsSelf, has_object_permission → 403)
 - [x] Liste complète des utilisateurs bloquée : list renvoie none() sans ?username= (get_queryset restreint à l'action list)
-- [ ] Ne pas exposer de données sensibles dans la recherche ?username= (serializer allégé : id, username)
+- [x] Ne pas exposer de données sensibles dans la recherche ?username= (serializer allégé : id, username)
 
 ## Dette technique (à corriger)
 

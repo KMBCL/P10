@@ -11,6 +11,14 @@ from django.core.exceptions import ValidationError as CoreValidationError
 from authentication.models import User
 
 
+class UserListSerializer(ModelSerializer[User]):
+
+    class Meta:
+        model = User
+        fields = ["id", "username"]
+        read_only_fields = fields
+
+
 class UserSerializer(ModelSerializer[User]):
 
     class Meta:
