@@ -6,5 +6,10 @@ from rest_framework.views import APIView
 
 
 class IsSelf(BasePermission):
-    def has_object_permission(self, request: Request, view: APIView, obj: Any) -> bool:
+    def has_object_permission(
+        self,
+        request: Request,
+        view: APIView,
+        obj: Any,
+    ) -> bool:
         return obj == request.user

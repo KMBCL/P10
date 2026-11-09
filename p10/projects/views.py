@@ -1,9 +1,20 @@
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+
 from django.db.models.query import QuerySet
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
 
 from projects.models import Comment, Contributor, Issue, Project
 from projects.serializers import CommentSerializer, IssueSerializer, ProjectSerializer
+
+from projects.permissions import IsAuthor
+
+if TYPE_CHECKING:
+    from rest_framework.permissions import _SupportsHasPermission
 
 
 class ProjectViewSet(ModelViewSet[Project]):
@@ -17,6 +28,11 @@ class ProjectViewSet(ModelViewSet[Project]):
         # Le créateur devient l'auteur ET le premier contributeur du projet.
         project = serializer.save(author=self.request.user)
         Contributor.objects.create(user=self.request.user, project=project)
+
+    def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsAuthor()]
+        return [IsAuthenticated()]
 
 
 class IssueViewSet(ModelViewSet[Issue]):

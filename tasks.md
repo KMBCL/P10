@@ -36,7 +36,6 @@
 - [ ] Message d'erreur personnalisé pour l'âge (constante dans constants.py)
 - [x] Un utilisateur peut consulter et modifier son propre profil (consentements inclus)
 - [x] Droit à l'oubli : un utilisateur peut supprimer son compte et ses données (destroy du ModelViewSet + on_delete CASCADE)
-- [ ] (optionnel) Anonymiser au lieu de supprimer, pour conserver les contributions des autres sur ses projets
 - [x] Un utilisateur ne peut pas modifier ou supprimer le compte d'un autre (IsSelf, has_object_permission → 403)
 - [x] Liste complète des utilisateurs bloquée : list renvoie none() sans ?username= (get_queryset restreint à l'action list)
 - [x] Ne pas exposer de données sensibles dans la recherche ?username= (serializer allégé : id, username)
@@ -70,12 +69,13 @@
 
 - [ ] Projets : la liste ne montre que les projets dont l'utilisateur est contributeur (get_queryset)
 - [ ] Projets : seul l'auteur peut modifier ou supprimer
-- [ ] Issues : seuls les contributeurs du projet peuvent lire et créer
+- [ ] Issues : seuls les contributeurs du projet peuvent lire et créer (create : vérifier dans validate_project, has_object_permission ne passe pas sur create)
 - [ ] Issues : seul l'auteur peut modifier ou supprimer
-- [ ] Comments : seuls les contributeurs du projet peuvent lire et créer
+- [ ] Comments : seuls les contributeurs du projet peuvent lire et créer (create : vérifier dans validate_issue)
 - [ ] Comments : seul l'auteur peut modifier ou supprimer
 - [x] Fichier authentication/permissions.py créé (IsSelf) : mécanisme has_permission / has_object_permission compris
-- [ ] Permissions projects : IsAuthor, IsContributor (même mécanisme)
+- [x] Permissions projects écrites : IsAuthor, IsProjectContributor, IsIssueContributor, IsCommentContributor (projects/permissions.py)
+- [ ] Brancher ces permissions dans get_permissions des 3 viewsets (update/destroy → IsAuthor, retrieve → IsXxxContributor)
 
 ## Green code / performance
 

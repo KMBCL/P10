@@ -4,10 +4,9 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from django.db.models.query import QuerySet
-from rest_framework.permissions import AllowAny
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from authentication.models import User
 from authentication.serializers import UserSerializer, UserListSerializer
