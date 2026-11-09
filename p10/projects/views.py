@@ -7,6 +7,7 @@ from django.db.models.query import QuerySet
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
 
 from projects.models import Comment, Contributor, Issue, Project
 from projects.serializers import CommentSerializer, IssueSerializer, ProjectSerializer
@@ -22,7 +23,7 @@ class ProjectViewSet(ModelViewSet[Project]):
     serializer_class = ProjectSerializer
 
     def get_queryset(self) -> QuerySet[Project, Project]:
-        return Project.objects.all()
+        return Project.objects.filter(contributors__user=self.request.user)
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
         # Le créateur devient l'auteur ET le premier contributeur du projet.
@@ -40,7 +41,12 @@ class IssueViewSet(ModelViewSet[Issue]):
     serializer_class = IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
-        return Issue.objects.all()
+        return Issue.objects.filter(project__contributors__user=self.request.user)
+
+    def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsAuthor()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer: BaseSerializer[Issue]) -> None:
         serializer.save(author=self.request.user)
@@ -51,7 +57,14 @@ class CommentViewSet(ModelViewSet[Comment]):
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
-        return Comment.objects.all()
+        return Comment.objects.filter(
+            issue__project__contributors__user=self.request.user
+        )
+
+    def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsAuthor()]
+        return [IsAuthenticated()]
 
     def perform_create(self, serializer: BaseSerializer[Comment]) -> None:
         serializer.save(author=self.request.user)

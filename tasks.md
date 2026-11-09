@@ -46,6 +46,7 @@
 - [ ] Remplacer l'import privé _SupportsHasPermission par un Protocol local
 - [x] Supprimer les imports inutilisés de view.py
 - [ ] Supprimer les imports inutilisés (projects/admin.py, projects/tests.py)
+- [ ] Imports inutilisés : PermissionDenied (projects/views.py), Comment et Contributor (serializers/issue.py), Contributor (serializers/comment.py)
 - [ ] flake8 E501 : permissions.py:9 (signature de has_object_permission à couper)
 - [ ] Pyright : "Meta overrides symbol" sur les 5 serializers (configuration ou ignore)
 - [ ] Pyright : typage de perform_create (BaseSerializer[Any] ou ignore ciblé)
@@ -67,15 +68,20 @@
 
 ## Permissions
 
-- [ ] Projets : la liste ne montre que les projets dont l'utilisateur est contributeur (get_queryset)
-- [ ] Projets : seul l'auteur peut modifier ou supprimer
-- [ ] Issues : seuls les contributeurs du projet peuvent lire et créer (create : vérifier dans validate_project, has_object_permission ne passe pas sur create)
-- [ ] Issues : seul l'auteur peut modifier ou supprimer
-- [ ] Comments : seuls les contributeurs du projet peuvent lire et créer (create : vérifier dans validate_issue)
-- [ ] Comments : seul l'auteur peut modifier ou supprimer
+- [x] Projets : la liste ne montre que les projets dont l'utilisateur est contributeur (get_queryset)
+- [x] Projets : seul l'auteur peut modifier ou supprimer (IsAuthor → 403 ; non-contributeur → 404)
+- [x] Issues : seuls les contributeurs du projet peuvent lire (get_queryset) et créer/déplacer (IssueSerializer.validate → 400)
+- [x] Issues : seul l'auteur peut modifier ou supprimer
+- [x] Comments : seuls les contributeurs du projet peuvent lire (get_queryset) et créer (CommentSerializer.validate → 400)
+- [x] Comments : seul l'auteur peut modifier ou supprimer
 - [x] Fichier authentication/permissions.py créé (IsSelf) : mécanisme has_permission / has_object_permission compris
 - [x] Permissions projects écrites : IsAuthor, IsProjectContributor, IsIssueContributor, IsCommentContributor (projects/permissions.py)
-- [ ] Brancher ces permissions dans get_permissions des 3 viewsets (update/destroy → IsAuthor, retrieve → IsXxxContributor)
+- [x] IsAuthor branché dans get_permissions des 3 viewsets (update/partial_update/destroy)
+- [x] Scénarios vérifiés par script (APIClient, transaction annulée) le 2026-11-09 : 17/17 conformes
+- [ ] IsProjectContributor / IsIssueContributor / IsCommentContributor inutilisés (le get_queryset couvre déjà) : supprimer ou brancher
+- [ ] (Optionnel) Non-contributeur qui crée une issue/comment : 403 (PermissionDenied) plutôt que 400
+- [ ] CommentSerializer : clé d'erreur "project" → "issue" (le champ soumis est issue)
+- [ ] Factoriser is_contributor dupliqué dans IssueSerializer et CommentSerializer
 
 ## Green code / performance
 
