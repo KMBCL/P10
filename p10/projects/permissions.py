@@ -15,11 +15,11 @@ class IsAuthor(BasePermission):
         return obj.author == request.user
 
 
-class IsProjectContributor(BasePermission):
+class IsProjectAuthor(BasePermission):
     def has_object_permission(
         self,
         request: Request,
         view: APIView,
         obj: Any,
     ) -> bool:
-        return obj.project.contributors.filter(user=request.user).exists()
+        return obj.project.author == request.user

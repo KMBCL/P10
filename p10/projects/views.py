@@ -17,7 +17,7 @@ from projects.serializers import (
     ContributorSerializer,
 )
 
-from projects.permissions import IsAuthor, IsProjectContributor
+from projects.permissions import IsAuthor, IsProjectAuthor
 
 if TYPE_CHECKING:
     from rest_framework.permissions import _SupportsHasPermission
@@ -80,7 +80,14 @@ class ContributorViewSet(ModelViewSet[Contributor]):
     serializer_class = ContributorSerializer
 
     def get_queryset(self) -> QuerySet[Contributor, Contributor]:
-        return Contributor.objects.filter(project__author=self.request.user)
+        return Contributor.objects.filter(project__contributors__user=self.request.user)
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
-        return [IsAuthenticated(), IsProjectContributor()]
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsProjectAuthor()]
+        return [IsAuthenticated()]
+
+    def perform_destroy(self, instance: Contributor) -> None:
+        if instance.user_id == instance.project.author_id:
+            raise PermissionDenied("L'auteur du projet ne peut pas être retiré.")
+        super().perform_destroy(instance)

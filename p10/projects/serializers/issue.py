@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from rest_framework.serializers import ModelSerializer, ValidationError
 
-from projects.models import Comment, Contributor, Issue, Project
+from projects.models import Issue, Project
 
 if TYPE_CHECKING:
     from authentication.models import User

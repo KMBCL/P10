@@ -1,3 +1,5 @@
+## Score d'audit (2026-11-09) : 74 / 100
+
 ## Fait
 
 - [x] User, hérité de AbstractUser (age >= 16, can_be_contacted, can_data_be_shared)
@@ -43,7 +45,13 @@
 ## Dette technique (à corriger)
 
 - [x] ImportError : MIN_AWALLOWED_AGE_ERROR_MESSAGE importé mais absent de constants.py (import retiré)
+- [x] ImportError : _SupportsHasPermission importé à l'exécution dans projects/views.py (n'existe que dans les stubs) → retiré, reste sous TYPE_CHECKING
+- [x] ImportError : UsesQuerySet importé depuis rest_framework.generics (stub uniquement) → ligne retirée
+- [ ] Règle à retenir : un nom qui n'existe que dans les stubs (_SupportsHasPermission, UsesQuerySet, _MT…) s'importe UNIQUEMENT sous `if TYPE_CHECKING:`
 - [ ] Remplacer l'import privé _SupportsHasPermission par un Protocol local
+- [ ] Pylance : user_id / author_id inconnus (FK annotées à la main) → annoter `user_id: int` / `author_id: int` dans les modèles, ou comparer instance.user == instance.project.author
+- [ ] Pyright : perform_destroy(instance: Contributor) incompatible → `# pyright: ignore[reportIncompatibleMethodOverride]`
+- [ ] flake8 (hors migrations) : 38 erreurs — 32 E501, 6 F401
 - [x] Supprimer les imports inutilisés de view.py
 - [ ] Supprimer les imports inutilisés (projects/admin.py, projects/tests.py)
 - [ ] Imports inutilisés : PermissionDenied (projects/views.py), Comment et Contributor (serializers/issue.py), Contributor (serializers/comment.py)
@@ -53,11 +61,18 @@
 
 ## Contributors
 
-- [ ] Vue Contributor : lister les contributeurs d'un projet
-- [ ] Ajouter un contributeur à un projet (par l'auteur du projet)
-- [ ] Retirer un contributeur d'un projet (par l'auteur du projet)
-- [ ] Empêcher de retirer l'auteur du projet
-- [ ] URLs Contributor
+- [x] ContributorViewSet + ContributorSerializer
+- [x] URLs Contributor (/api/contributors/, router)
+- [x] Non authentifié → 401 ; non-contributeur du projet → 404 (lecture, suppression) / 400 (création)
+- [x] Doublon user/projet refusé (UniqueTogetherValidator → 400)
+- [x] get_queryset sur project__contributors__user : un contributeur voit les contributeurs de ses projets, rien d'autre
+- [x] Ajout réservé à l'auteur du projet (ContributorSerializer.is_author → 400)
+- [x] Modification/suppression réservées à l'auteur du projet (IsProjectAuthor → 403)
+- [x] L'auteur ne peut pas se retirer de son projet (perform_destroy → 403)
+- [x] Audit script 2026-11-09 (transaction annulée) : 18/19 conformes
+- [ ] FAILLE : l'auteur peut PATCH son propre contributor (user=Bob) → 200, il n'est plus contributeur de son projet et perd l'accès. Bloquer update/partial_update : http_method_names = ["get", "post", "delete", "head", "options"]
+- [ ] Supprimer IsProjectContributor (plus utilisée, import F401 dans views.py)
+- [ ] Champ author sur Contributor (« chaque ressource hors utilisateur doit posséder un author ») ou justifier project.author
 
 ## Routes imbriquées (recommandé)
 
@@ -78,7 +93,8 @@
 - [x] Permissions projects écrites : IsAuthor, IsProjectContributor, IsIssueContributor, IsCommentContributor (projects/permissions.py)
 - [x] IsAuthor branché dans get_permissions des 3 viewsets (update/partial_update/destroy)
 - [x] Scénarios vérifiés par script (APIClient, transaction annulée) le 2026-11-09 : 17/17 conformes
-- [ ] IsProjectContributor / IsIssueContributor / IsCommentContributor inutilisés (le get_queryset couvre déjà) : supprimer ou brancher
+- [x] IsIssueContributor / IsCommentContributor supprimés
+- [x] IsProjectAuthor (obj.project.author) ajoutée et branchée sur update/partial_update/destroy de ContributorViewSet
 - [ ] (Optionnel) Non-contributeur qui crée une issue/comment : 403 (PermissionDenied) plutôt que 400
 - [ ] CommentSerializer : clé d'erreur "project" → "issue" (le champ soumis est issue)
 - [ ] Factoriser is_contributor dupliqué dans IssueSerializer et CommentSerializer
