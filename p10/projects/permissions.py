@@ -22,24 +22,4 @@ class IsProjectContributor(BasePermission):
         view: APIView,
         obj: Any,
     ) -> bool:
-        return obj.contributors.filter(user=request.user).exists()
-
-
-class IsIssueContributor(BasePermission):
-    def has_object_permission(
-        self,
-        request: Request,
-        view: APIView,
-        obj: Any,
-    ) -> bool:
         return obj.project.contributors.filter(user=request.user).exists()
-
-
-class IsCommentContributor(BasePermission):
-    def has_object_permission(
-        self,
-        request: Request,
-        view: APIView,
-        obj: Any,
-    ) -> bool:
-        return obj.issue.project.contributors.filter(user=request.user).exists()

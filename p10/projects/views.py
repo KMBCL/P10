@@ -10,9 +10,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 
 from projects.models import Comment, Contributor, Issue, Project
-from projects.serializers import CommentSerializer, IssueSerializer, ProjectSerializer
+from projects.serializers import (
+    CommentSerializer,
+    IssueSerializer,
+    ProjectSerializer,
+    ContributorSerializer,
+)
 
-from projects.permissions import IsAuthor
+from projects.permissions import IsAuthor, IsProjectContributor
 
 if TYPE_CHECKING:
     from rest_framework.permissions import _SupportsHasPermission
@@ -68,3 +73,14 @@ class CommentViewSet(ModelViewSet[Comment]):
 
     def perform_create(self, serializer: BaseSerializer[Comment]) -> None:
         serializer.save(author=self.request.user)
+
+
+class ContributorViewSet(ModelViewSet[Contributor]):
+
+    serializer_class = ContributorSerializer
+
+    def get_queryset(self) -> QuerySet[Contributor, Contributor]:
+        return Contributor.objects.filter(project__author=self.request.user)
+
+    def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        return [IsAuthenticated(), IsProjectContributor()]
