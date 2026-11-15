@@ -1,4 +1,4 @@
-from rest_framework.routers import SimpleRouter
+from rest_framework_nested import routers
 
 from projects.views import (
     CommentViewSet,
@@ -7,10 +7,36 @@ from projects.views import (
     ProjectViewSet,
 )
 
-router = SimpleRouter()
+router = routers.SimpleRouter()
 router.register("projects", ProjectViewSet, basename="project")
-router.register("issues", IssueViewSet, basename="issue")
-router.register("comments", CommentViewSet, basename="comment")
-router.register("contributors", ContributorViewSet, basename="contributor")
+projects_router = routers.NestedSimpleRouter(
+    router,
+    "projects",
+    lookup="project",
+)
 
-urlpatterns = router.urls
+projects_router.register(
+    "contributors",
+    ContributorViewSet,
+    basename="project-contributor",
+)
+
+projects_router.register(
+    "issues",
+    IssueViewSet,
+    base_name="project-issue",
+)
+
+issues_routeur = routers.NestedSimpleRouter(
+    projects_router,
+    "issues",
+    lookup="issue",
+)
+
+issues_routeur.register(
+    "comments",
+    CommentViewSet,
+    "issue-commnent",
+)
+
+urlpatterns = router.urls + projects_router.urls + issues_routeur.urls

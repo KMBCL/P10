@@ -40,7 +40,7 @@ class CommentSerializer(ModelSerializer[Comment]):
             "issue", self.instance.issue if self.instance else None
         )
         if issue is None:
-            raise ValidationError({"project": "Le projet n'est pas défini."})
+            raise ValidationError({"issue": "Le projet n'est pas défini."})
 
         project = issue.project
         user = self.context["request"].user

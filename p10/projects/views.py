@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models.query import QuerySet
+from django.db.transaction import atomic
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -26,14 +29,18 @@ if TYPE_CHECKING:
 class ProjectViewSet(ModelViewSet[Project]):
 
     serializer_class = ProjectSerializer
+    # Reprise par les routes imbriquées pour project_pk : un id non numérique
+    # donne une 404 à la résolution d'URL au lieu d'une 500 en SQL.
+    lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
         return Project.objects.filter(contributors__user=self.request.user)
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
         # Le créateur devient l'auteur ET le premier contributeur du projet.
-        project = serializer.save(author=self.request.user)
-        Contributor.objects.create(user=self.request.user, project=project)
+        with atomic():
+            project = serializer.save(author=self.request.user)
+            Contributor.objects.create(user=self.request.user, project=project)
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
