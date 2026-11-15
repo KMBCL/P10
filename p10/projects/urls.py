@@ -24,7 +24,7 @@ projects_router.register(
 projects_router.register(
     "issues",
     IssueViewSet,
-    base_name="project-issue",
+    basename="project-issue",
 )
 
 issues_routeur = routers.NestedSimpleRouter(
@@ -36,7 +36,7 @@ issues_routeur = routers.NestedSimpleRouter(
 issues_routeur.register(
     "comments",
     CommentViewSet,
-    "issue-commnent",
+    basename="issue-comment",
 )
 
 urlpatterns = router.urls + projects_router.urls + issues_routeur.urls

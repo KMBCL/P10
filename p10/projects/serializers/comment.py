@@ -4,12 +4,14 @@ from typing import TYPE_CHECKING, Any
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from projects.models import Comment, Issue, Project
+from authentication.serializers import UserListSerializer
 
 if TYPE_CHECKING:
     from authentication.models import User
 
 
 class CommentSerializer(ModelSerializer[Comment]):
+    author = UserListSerializer(read_only=True)
 
     class Meta:
         model = Comment

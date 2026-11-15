@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from projects.models import Contributor, Project
+from authentication.serializers import UserListSerializer
 
 if TYPE_CHECKING:
     from authentication.models import User
