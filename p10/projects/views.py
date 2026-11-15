@@ -9,6 +9,7 @@ from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import get_object_or_404
 
 from projects.models import Comment, Contributor, Issue, Project
 from projects.serializers import (
@@ -82,17 +83,27 @@ class CommentViewSet(ModelViewSet[Comment]):
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
+        # Les deux clés de l'URL : l'issue doit appartenir au projet.
         return Comment.objects.filter(
-            issue__project__contributors__user=self.request.user
+            issue_id=self.kwargs["issue_pk"],
+            issue__project_id=self.kwargs["project_pk"],
+            issue__project__contributors__user=self.request.user,
         )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), IsAuthor()]
-        return [IsAuthenticated()]
+            return [IsAuthenticated(), IsProjectContributor(), IsAuthor()]
+        return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Comment]) -> None:
-        serializer.save(author=self.request.user)
+        # IsProjectContributor ne valide que project_pk : on vérifie ici
+        # que issue_pk appartient bien à ce projet, sinon 404.
+        issue = get_object_or_404(
+            Issue,
+            pk=self.kwargs["issue_pk"],
+            project_id=self.kwargs["project_pk"],
+        )
+        serializer.save(author=self.request.user, issue=issue)
 
 
 class ContributorViewSet(ModelViewSet[Contributor]):
