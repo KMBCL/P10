@@ -1,16 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 from rest_framework.serializers import ModelSerializer, ValidationError
 
+from authentication.models import User
+from authentication.serializers import UserRelatedField
 from projects.access import AccessManager
 from projects.models import Contributor
 
-if TYPE_CHECKING:
-    from authentication.models import User
-
 
 class ContributorSerializer(ModelSerializer[Contributor]):
+    user = UserRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = Contributor

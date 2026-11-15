@@ -2,6 +2,7 @@ from typing import Any
 
 from rest_framework.serializers import (
     ModelSerializer,
+    PrimaryKeyRelatedField,
     ValidationError as SerializerValidationError,
 )
 from django.contrib.auth.password_validation import validate_password
@@ -20,6 +21,20 @@ class UserListSerializer(ModelSerializer[User]):
             "username",
         ]
         read_only_fields = fields
+
+
+class UserRelatedField(PrimaryKeyRelatedField):
+    """Relation vers un User écrite par pk, lue comme objet.
+
+    Entrée : {"assigned_to": 3}
+    Sortie : {"assigned_to": {"id": 3, "username": "..."}}
+    """
+
+    def use_pk_only_optimization(self) -> bool:
+        return False
+
+    def to_representation(self, value: User) -> dict[str, Any]:
+        return UserListSerializer(value).data
 
 
 class UserSerializer(ModelSerializer[User]):

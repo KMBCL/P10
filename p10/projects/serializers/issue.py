@@ -1,19 +1,35 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
-from rest_framework.serializers import ModelSerializer, ValidationError
+from rest_framework.serializers import ModelSerializer
 
-from projects.models import Contributor, Issue
+from projects.models import Issue
 from projects.serializers.project import ProjectRelatedSerializer
-from authentication.serializers import UserListSerializer
+from authentication.models import User
+from authentication.serializers import UserListSerializer, UserRelatedField
 
-if TYPE_CHECKING:
-    from authentication.models import User
+
+class AssignableUserField(UserRelatedField):
+    """Seuls les contributeurs du projet de l'URL sont acceptés.
+
+    Un id inexistant et un id hors projet tombent dans le même cas
+    (does_not_exist), avec le même message : on ne révèle pas
+    l'existence de comptes hors du projet (OWASP, énumération).
+    """
+
+    default_error_messages = {
+        **UserRelatedField.default_error_messages,
+        "does_not_exist": "Utilisateur invalide pour ce projet.",
+    }
+
+    def get_queryset(self):
+        project_pk = self.context["view"].kwargs["project_pk"]
+        return User.objects.filter(contributions__project_id=project_pk)
 
 
 class IssueListSerializer(ModelSerializer[Issue]):
     author = UserListSerializer(read_only=True)
     project = ProjectRelatedSerializer(read_only=True)
+    assigned_to = UserListSerializer(read_only=True)
 
     class Meta:
         model = Issue
@@ -34,8 +50,8 @@ class IssueListSerializer(ModelSerializer[Issue]):
 
 class IssueSerializer(ModelSerializer[Issue]):
     author = UserListSerializer(read_only=True)
-    # Le projet vient de l'URL (perform_create), jamais du body.
     project = ProjectRelatedSerializer(read_only=True)
+    assigned_to = AssignableUserField(allow_null=True, required=False)
 
     class Meta:
         model = Issue
@@ -52,16 +68,3 @@ class IssueSerializer(ModelSerializer[Issue]):
             "created_time",
         ]
         read_only_fields = ["id", "author", "created_time"]
-
-    def validate_assigned_to(self, assigned_to: User | None) -> User | None:
-        project_pk = self.context["view"].kwargs["project_pk"]
-        if (
-            assigned_to is not None
-            and not Contributor.objects.filter(
-                project_id=project_pk, user=assigned_to
-            ).exists()
-        ):
-            raise ValidationError(
-                "L'utilisateur assigné doit être contributeur du projet."
-            )
-        return assigned_to
