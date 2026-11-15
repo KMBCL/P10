@@ -17,13 +17,11 @@ class User(AbstractUser):
         unique=True,
         validators=[UnicodeUsernameValidator()],
     )
-    # RGPD : inscription interdite aux 15 ans et moins.
     age: models.PositiveIntegerField[int | Combinable, int] = (
         models.PositiveIntegerField(
             validators=[MinValueValidator(MIN_ALLOWED_AGE)],
         )
     )
-    # Consentements explicites : False tant que l'utilisateur ne les donne pas.
     can_be_contacted: models.BooleanField[bool | Combinable, bool] = (
         models.BooleanField(default=False)
     )
@@ -31,5 +29,4 @@ class User(AbstractUser):
         models.BooleanField(default=False)
     )
 
-    # Demandés par createsuperuser : age n'a pas de valeur par défaut.
     REQUIRED_FIELDS: ClassVar[list[str]] = ["email", "age"]

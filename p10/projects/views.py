@@ -35,10 +35,11 @@ class ProjectViewSet(ModelViewSet[Project]):
     lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
-        # Tri explicite : la pagination exige un ordre stable entre pages.
-        return Project.objects.filter(
-            contributors__user=self.request.user
-        ).order_by("created_time", "pk")
+        return (
+            Project.objects.filter(contributors__user=self.request.user)
+            .select_related("author")
+            .order_by("created_time", "pk")
+        )
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
         with atomic():
@@ -60,10 +61,14 @@ class IssueViewSet(ModelViewSet[Issue]):
         return IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
-        return Issue.objects.filter(
-            project__id=self.kwargs["project_pk"],
-            project__contributors__user=self.request.user,
-        ).order_by("created_time", "pk")
+        return (
+            Issue.objects.filter(
+                project__id=self.kwargs["project_pk"],
+                project__contributors__user=self.request.user,
+            )
+            .select_related("author", "project__author", "assigned_to")
+            .order_by("created_time", "pk")
+        )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
@@ -81,11 +86,15 @@ class CommentViewSet(ModelViewSet[Comment]):
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
-        return Comment.objects.filter(
-            issue_id=self.kwargs["issue_pk"],
-            issue__project_id=self.kwargs["project_pk"],
-            issue__project__contributors__user=self.request.user,
-        ).order_by("created_time", "pk")
+        return (
+            Comment.objects.filter(
+                issue_id=self.kwargs["issue_pk"],
+                issue__project_id=self.kwargs["project_pk"],
+                issue__project__contributors__user=self.request.user,
+            )
+            .select_related("author")
+            .order_by("created_time", "pk")
+        )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
@@ -106,10 +115,14 @@ class ContributorViewSet(ModelViewSet[Contributor]):
     http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self) -> QuerySet[Contributor, Contributor]:
-        return Contributor.objects.filter(
-            project_id=self.kwargs["project_pk"],
-            project__contributors__user=self.request.user,
-        ).order_by("created_time", "pk")
+        return (
+            Contributor.objects.filter(
+                project_id=self.kwargs["project_pk"],
+                project__contributors__user=self.request.user,
+            )
+            .select_related("user")
+            .order_by("created_time", "pk")
+        )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("create", "destroy"):
