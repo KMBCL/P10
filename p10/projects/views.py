@@ -61,14 +61,13 @@ class IssueViewSet(ModelViewSet[Issue]):
         return IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
-        return (
-            Issue.objects.filter(
-                project__id=self.kwargs["project_pk"],
-                project__contributors__user=self.request.user,
-            )
-            .select_related("author", "project__author", "assigned_to")
-            .order_by("created_time", "pk")
-        )
+        queryset = Issue.objects.filter(
+            project__id=self.kwargs["project_pk"],
+            project__contributors__user=self.request.user,
+        ).select_related("author", "assigned_to")
+        if self.action != "list":
+            queryset = queryset.select_related("project__author")
+        return queryset.order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):

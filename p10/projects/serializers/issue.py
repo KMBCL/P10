@@ -28,7 +28,6 @@ class AssignableUserField(UserRelatedField):
 
 class IssueListSerializer(ModelSerializer[Issue]):
     author = UserListSerializer(read_only=True)
-    project = ProjectRelatedSerializer(read_only=True)
     assigned_to = UserListSerializer(read_only=True)
 
     class Meta:
@@ -36,7 +35,6 @@ class IssueListSerializer(ModelSerializer[Issue]):
         fields = [
             "id",
             "author",
-            "project",
             "name",
             "status",
             "priority",
