@@ -35,7 +35,10 @@ class ProjectViewSet(ModelViewSet[Project]):
     lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
-        return Project.objects.filter(contributors__user=self.request.user)
+        # Tri explicite : la pagination exige un ordre stable entre pages.
+        return Project.objects.filter(
+            contributors__user=self.request.user
+        ).order_by("created_time", "pk")
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
         with atomic():
@@ -60,7 +63,7 @@ class IssueViewSet(ModelViewSet[Issue]):
         return Issue.objects.filter(
             project__id=self.kwargs["project_pk"],
             project__contributors__user=self.request.user,
-        )
+        ).order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
@@ -82,7 +85,7 @@ class CommentViewSet(ModelViewSet[Comment]):
             issue_id=self.kwargs["issue_pk"],
             issue__project_id=self.kwargs["project_pk"],
             issue__project__contributors__user=self.request.user,
-        )
+        ).order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
@@ -106,7 +109,7 @@ class ContributorViewSet(ModelViewSet[Contributor]):
         return Contributor.objects.filter(
             project_id=self.kwargs["project_pk"],
             project__contributors__user=self.request.user,
-        )
+        ).order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("create", "destroy"):

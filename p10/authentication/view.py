@@ -29,7 +29,7 @@ class UserViewset(ModelViewSet[User]):
         return [IsAuthenticated(), IsSelf()]
 
     def get_queryset(self) -> QuerySet[User, User]:
-        queryset = User.objects.filter(is_active=True)
+        queryset = User.objects.filter(is_active=True).order_by("pk")
         if self.action != "list":
             return queryset
 
