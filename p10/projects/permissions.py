@@ -18,13 +18,16 @@ class IsAuthor(BasePermission):
 
 
 class IsProjectAuthor(BasePermission):
-    def has_object_permission(
-        self,
-        request: Request,
-        view: APIView,
-        obj: Any,
-    ) -> bool:
-        return obj.project.author == request.user
+    """Contrôle sur le projet parent de l'URL /projects/{project_pk}/...
+    Au niveau vue (has_permission) pour couvrir aussi create, qui n'a
+    pas d'objet. À placer après IsProjectContributor."""
+
+    message = "Vous devez être l'auteur du projet."
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        return AccessManager(request.user).is_project_author(
+            view.kwargs["project_pk"]
+        )
 
 
 class IsProjectContributor(BasePermission):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from projects.models import Contributor
+from projects.models import Contributor, Project
 
 if TYPE_CHECKING:
     from authentication.models import User
@@ -18,3 +18,6 @@ class AccessManager:
         return Contributor.objects.filter(
             project_id=project_id, user=self.user
         ).exists()
+
+    def is_project_author(self, project_id: int | str) -> bool:
+        return Project.objects.filter(pk=project_id, author=self.user).exists()

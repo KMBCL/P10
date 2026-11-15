@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 
 
 class ProjectViewSet(ModelViewSet[Project]):
-
     serializer_class = ProjectSerializer
     lookup_value_regex = r"\d+"
 
@@ -39,7 +38,6 @@ class ProjectViewSet(ModelViewSet[Project]):
         return Project.objects.filter(contributors__user=self.request.user)
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
-        # Le créateur devient l'auteur ET le premier contributeur du projet.
         with atomic():
             project = serializer.save(author=self.request.user)
             Contributor.objects.create(user=self.request.user, project=project)
@@ -51,8 +49,6 @@ class ProjectViewSet(ModelViewSet[Project]):
 
 
 class IssueViewSet(ModelViewSet[Issue]):
-
-    # Reprise par la route imbriquée des commentaires pour issue_pk.
     lookup_value_regex = r"\d+"
 
     def get_serializer_class(self) -> type[BaseSerializer[Issue]]:
@@ -79,11 +75,9 @@ class IssueViewSet(ModelViewSet[Issue]):
 
 
 class CommentViewSet(ModelViewSet[Comment]):
-
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
-        # Les deux clés de l'URL : l'issue doit appartenir au projet.
         return Comment.objects.filter(
             issue_id=self.kwargs["issue_pk"],
             issue__project_id=self.kwargs["project_pk"],
@@ -96,8 +90,6 @@ class CommentViewSet(ModelViewSet[Comment]):
         return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Comment]) -> None:
-        # IsProjectContributor ne valide que project_pk : on vérifie ici
-        # que issue_pk appartient bien à ce projet, sinon 404.
         issue = get_object_or_404(
             Issue,
             pk=self.kwargs["issue_pk"],
@@ -107,16 +99,26 @@ class CommentViewSet(ModelViewSet[Comment]):
 
 
 class ContributorViewSet(ModelViewSet[Contributor]):
-
     serializer_class = ContributorSerializer
+    http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self) -> QuerySet[Contributor, Contributor]:
-        return Contributor.objects.filter(project__contributors__user=self.request.user)
+        return Contributor.objects.filter(
+            project_id=self.kwargs["project_pk"],
+            project__contributors__user=self.request.user,
+        )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
-        if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), IsProjectAuthor()]
-        return [IsAuthenticated()]
+        if self.action in ("create", "destroy"):
+            return [
+                IsAuthenticated(),
+                IsProjectContributor(),
+                IsProjectAuthor(),
+            ]
+        return [IsAuthenticated(), IsProjectContributor()]
+
+    def perform_create(self, serializer: BaseSerializer[Contributor]) -> None:
+        serializer.save(project_id=self.kwargs["project_pk"])
 
     def perform_destroy(self, instance: Contributor) -> None:
         if instance.user_id == instance.project.author_id:

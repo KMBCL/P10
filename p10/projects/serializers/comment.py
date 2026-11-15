@@ -16,7 +16,6 @@ class CommentSerializer(ModelSerializer[Comment]):
             "description",
             "created_time",
         ]
-        # L'issue vient de l'URL (perform_create), jamais du body.
         read_only_fields = [
             "id",
             "author",
