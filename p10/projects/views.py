@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from django.db.models.query import QuerySet
 from django.db.transaction import atomic
-from rest_framework.request import Request
-from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -16,11 +14,16 @@ from projects.models import Comment, Contributor, Issue, Project
 from projects.serializers import (
     CommentSerializer,
     IssueSerializer,
+    IssueListSerializer,
     ProjectSerializer,
     ContributorSerializer,
 )
 
-from projects.permissions import IsAuthor, IsProjectAuthor
+from projects.permissions import (
+    IsAuthor,
+    IsProjectAuthor,
+    IsProjectContributor,
+)
 
 if TYPE_CHECKING:
     from rest_framework.permissions import _SupportsHasPermission
@@ -29,8 +32,6 @@ if TYPE_CHECKING:
 class ProjectViewSet(ModelViewSet[Project]):
 
     serializer_class = ProjectSerializer
-    # Reprise par les routes imbriquées pour project_pk : un id non numérique
-    # donne une 404 à la résolution d'URL au lieu d'une 500 en SQL.
     lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
@@ -50,18 +51,30 @@ class ProjectViewSet(ModelViewSet[Project]):
 
 class IssueViewSet(ModelViewSet[Issue]):
 
-    serializer_class = IssueSerializer
+    # Reprise par la route imbriquée des commentaires pour issue_pk.
+    lookup_value_regex = r"\d+"
+
+    def get_serializer_class(self) -> type[BaseSerializer[Issue]]:
+        if self.action == "list":
+            return IssueListSerializer
+        return IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
-        return Issue.objects.filter(project__contributors__user=self.request.user)
+        return Issue.objects.filter(
+            project__id=self.kwargs["project_pk"],
+            project__contributors__user=self.request.user,
+        )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         if self.action in ("update", "partial_update", "destroy"):
-            return [IsAuthenticated(), IsAuthor()]
-        return [IsAuthenticated()]
+            return [IsAuthenticated(), IsProjectContributor(), IsAuthor()]
+        return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Issue]) -> None:
-        serializer.save(author=self.request.user)
+        serializer.save(
+            author=self.request.user,
+            project_id=self.kwargs["project_pk"],
+        )
 
 
 class CommentViewSet(ModelViewSet[Comment]):
