@@ -36,9 +36,11 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Désactivé par défaut : seul DJANGO_DEBUG=True dans .env l'active (développement).
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
+# Requis quand DEBUG est désactivé ; liste séparée par des virgules dans .env.
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -51,14 +53,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "debug_toolbar",
     "authentication",
     "projects",
 ]
 
 MIDDLEWARE = [
-    # En tête : la toolbar doit voir la requête au plus tôt (recommandation de la doc).
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -70,8 +69,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "project_10.urls"
 
-# La toolbar ne s'affiche que pour ces IP (et si DEBUG = True).
-INTERNAL_IPS = ["127.0.0.1"]
+# Debug toolbar : dépendance de dev (pipenv install --dev), chargée seulement en DEBUG.
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    # En tête : la toolbar doit voir la requête au plus tôt (recommandation de la doc).
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    # La toolbar ne s'affiche que pour ces IP.
+    INTERNAL_IPS = ["127.0.0.1"]
 
 TEMPLATES: list[dict[str, Any]] = [
     {
