@@ -10,7 +10,7 @@ from authentication.constants import MIN_ALLOWED_AGE
 
 
 class User(AbstractUser):
-    """Utilisateur SoftDesk : identifiants natifs + âge et consentements RGPD."""
+    """SoftDesk user: native credentials plus age and GDPR consents."""
 
     username: models.CharField[str | int | Combinable, str] = models.CharField(
         max_length=50,

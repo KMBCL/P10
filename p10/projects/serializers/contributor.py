@@ -9,6 +9,8 @@ from projects.models import Contributor
 
 
 class ContributorSerializer(ModelSerializer[Contributor]):
+    """Contributor representation; rejects users already in the project."""
+
     user = UserRelatedField(queryset=User.objects.all())
 
     class Meta:

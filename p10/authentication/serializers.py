@@ -13,6 +13,7 @@ from authentication.models import User
 
 
 class UserListSerializer(ModelSerializer[User]):
+    """Public user representation: id and username only."""
 
     class Meta:
         model = User
@@ -24,11 +25,7 @@ class UserListSerializer(ModelSerializer[User]):
 
 
 class UserRelatedField(PrimaryKeyRelatedField):
-    """Relation vers un User écrite par pk, lue comme objet.
-
-    Entrée : {"assigned_to": 3}
-    Sortie : {"assigned_to": {"id": 3, "username": "..."}}
-    """
+    """User relation written as a pk and read as a nested object."""
 
     def use_pk_only_optimization(self) -> bool:
         return False
@@ -38,6 +35,7 @@ class UserRelatedField(PrimaryKeyRelatedField):
 
 
 class UserSerializer(ModelSerializer[User]):
+    """Full user representation with password validation and hashing."""
 
     class Meta:
         model = User
@@ -53,16 +51,12 @@ class UserSerializer(ModelSerializer[User]):
         extra_kwargs = {"password": {"write_only": True}}
 
     def temp_user(self, attrs: Any) -> User:
-        """Creates temp user created for UserAttributeSimilarityValidator."""
+        """Build an unsaved user for UserAttributeSimilarityValidator."""
         user = User(**{key: value for key, value in attrs.items() if key != "password"})
         return user
 
     def validate(self, attrs: Any) -> Any:
-        """Valides user data.
-
-        temp_user is used for create action
-        otherwise self.instance is used
-        """
+        """Validate the password against the instance, or a temp user on create."""
         password = attrs.get("password")
         if password is not None:
             user = self.instance or self.temp_user(attrs)
@@ -75,11 +69,7 @@ class UserSerializer(ModelSerializer[User]):
         return attrs
 
     def update(self, instance: User, validated_data: Any) -> User:
-        """Updates user.
-        First, the password is popped from updated fields,
-        if in attrs it is hashed and set hashed in instance.
-        Then the instance is saved (password no longer in validated data).
-        """
+        """Update the user, hashing the password if provided."""
         password = validated_data.pop("password", None)
         if password is not None:
             instance.set_password(password)

@@ -31,6 +31,8 @@ if TYPE_CHECKING:
 
 
 class ProjectViewSet(ModelViewSet[Project]):
+    """CRUD on projects the user contributes to; only the author may modify."""
+
     serializer_class = ProjectSerializer
     lookup_value_regex = r"\d+"
 
@@ -53,6 +55,8 @@ class ProjectViewSet(ModelViewSet[Project]):
 
 
 class IssueViewSet(ModelViewSet[Issue]):
+    """CRUD on a project's issues for its contributors; only the author may modify."""
+
     lookup_value_regex = r"\d+"
 
     def get_serializer_class(self) -> type[BaseSerializer[Issue]]:
@@ -67,9 +71,11 @@ class IssueViewSet(ModelViewSet[Issue]):
         ).select_related("author", "assigned_to")
         if self.action != "list":
             queryset = queryset.select_related("project__author")
+        # indexer created_time côté base
         return queryset.order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        # update is_author
         if self.action in ("update", "partial_update", "destroy"):
             return [IsAuthenticated(), IsProjectContributor(), IsAuthor()]
         return [IsAuthenticated(), IsProjectContributor()]
@@ -82,6 +88,8 @@ class IssueViewSet(ModelViewSet[Issue]):
 
 
 class CommentViewSet(ModelViewSet[Comment]):
+    """CRUD on an issue's comments for project contributors; only the author may modify."""
+
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
@@ -110,6 +118,8 @@ class CommentViewSet(ModelViewSet[Comment]):
 
 
 class ContributorViewSet(ModelViewSet[Contributor]):
+    """Lists, adds and removes project contributors; writes reserved to the project author."""
+
     serializer_class = ContributorSerializer
     http_method_names = ["get", "post", "delete", "head", "options"]
 

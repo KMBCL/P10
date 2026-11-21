@@ -8,6 +8,8 @@ from authentication.models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin[User]):
+    """Django admin for User, extended with SoftDesk age and consent fields."""
+
     fieldsets: Any = (*(BaseUserAdmin.fieldsets or ()), ('SoftDesk', {
         'fields': ('age', 'can_be_contacted', 'can_data_be_shared'),
     }))

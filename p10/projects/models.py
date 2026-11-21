@@ -12,7 +12,11 @@ if TYPE_CHECKING:
 
 
 class Project(models.Model):
+    """Software project owned by an author and shared with contributors."""
+
     class TypeTag(models.TextChoices):
+        """Target platform of the project."""
+
         BACK_END = "BACK_END", "Back-end"
         FRONT_END = "FRONT_END", "Front-end"
         IOS = ("IOS", "iOS")
@@ -36,17 +40,25 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
+    """Task, bug or feature tracked within a project."""
+
     class TypeTag(models.TextChoices):
+        """Nature of the issue."""
+
         BUG = "BUG", "Bug"
         TASK = "TASK", "Tâche"
         FEATURE = "FEATURE", "Fonctionnalité"
 
     class PriorityTag(models.TextChoices):
+        """Priority level of the issue."""
+
         HIGH = "HIGH", "Haute"
         MEDIUM = "MEDIUM", "Moyenne"
         LOW = "LOW", "Faible"
 
     class StatusTag(models.TextChoices):
+        """Progress status of the issue."""
+
         TO_DO = "TO_DO", "A faire"
         FINISHED = "FINISHED", "Terminée"
         IN_PROGRESS = "IN_PROGRESS", "EN cours"
@@ -89,6 +101,8 @@ class Issue(models.Model):
 
 
 class Comment(models.Model):
+    """Comment posted on an issue, identified by a UUID."""
+
     id: models.UUIDField[UUID, UUID] = models.UUIDField(
         primary_key=True, default=uuid4, editable=False
     )
@@ -107,6 +121,8 @@ class Comment(models.Model):
 
 
 class Contributor(models.Model):
+    """Membership link granting a user access to a project."""
+
     user: models.ForeignKey[User, User] = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

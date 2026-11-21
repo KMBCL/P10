@@ -5,6 +5,8 @@ from authentication.serializers import UserListSerializer
 
 
 class ProjectRelatedSerializer(ModelSerializer[Project]):
+    """Minimal project representation for nesting in other resources."""
+
     author = UserListSerializer(read_only=True)
 
     class Meta:
@@ -21,6 +23,8 @@ class ProjectRelatedSerializer(ModelSerializer[Project]):
 
 
 class ProjectSerializer(ModelSerializer[Project]):
+    """Full project representation with nested author."""
+
     author = UserListSerializer(read_only=True)
 
     class Meta:

@@ -8,6 +8,8 @@ from projects.access import AccessManager
 
 
 class IsAuthor(BasePermission):
+    """Allows access only to the author of the object."""
+
     def has_object_permission(
         self,
         request: Request,
@@ -18,9 +20,7 @@ class IsAuthor(BasePermission):
 
 
 class IsProjectAuthor(BasePermission):
-    """Contrôle sur le projet parent de l'URL /projects/{project_pk}/...
-    Au niveau vue (has_permission) pour couvrir aussi create, qui n'a
-    pas d'objet. À placer après IsProjectContributor."""
+    """Allows access only to the author of the URL's project; place after IsProjectContributor."""
 
     message = "Vous devez être l'auteur du projet."
 
@@ -31,8 +31,7 @@ class IsProjectAuthor(BasePermission):
 
 
 class IsProjectContributor(BasePermission):
-    """Contrôle sur le projet parent de l'URL /projects/{project_pk}/...
-    À placer après IsAuthenticated."""
+    """Allows access only to contributors of the URL's project; place after IsAuthenticated."""
 
     message = "Vous devez être contributeur du projet."
 

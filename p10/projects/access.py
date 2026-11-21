@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class AccessManager:
-    """Règles d'accès : qui a le droit de faire quoi sur un projet."""
+    """Access rules: who is allowed to do what on a project."""
 
     def __init__(self, user: User) -> None:
         self.user = user

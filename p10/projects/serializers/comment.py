@@ -5,6 +5,8 @@ from authentication.serializers import UserListSerializer
 
 
 class CommentSerializer(ModelSerializer[Comment]):
+    """Comment representation with nested author."""
+
     author = UserListSerializer(read_only=True)
 
     class Meta:

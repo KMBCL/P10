@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 
 class UserViewset(ModelViewSet[User]):
+    """Open sign-up, username lookup, and self-management of the user's account."""
 
     def get_serializer_class(self) -> type[BaseSerializer[User]]:
         if self.action == "list":

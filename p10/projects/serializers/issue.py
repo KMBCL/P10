@@ -9,12 +9,7 @@ from authentication.serializers import UserListSerializer, UserRelatedField
 
 
 class AssignableUserField(UserRelatedField):
-    """Seuls les contributeurs du projet de l'URL sont acceptés.
-
-    Un id inexistant et un id hors projet tombent dans le même cas
-    (does_not_exist), avec le même message : on ne révèle pas
-    l'existence de comptes hors du projet (OWASP, énumération).
-    """
+    """Accepts only project contributors, with one error message to prevent user enumeration."""
 
     default_error_messages = {
         **UserRelatedField.default_error_messages,
@@ -27,6 +22,8 @@ class AssignableUserField(UserRelatedField):
 
 
 class IssueListSerializer(ModelSerializer[Issue]):
+    """Lightweight issue representation for list views."""
+
     author = UserListSerializer(read_only=True)
     assigned_to = UserListSerializer(read_only=True)
 
@@ -47,6 +44,8 @@ class IssueListSerializer(ModelSerializer[Issue]):
 
 
 class IssueSerializer(ModelSerializer[Issue]):
+    """Full issue representation with nested author and project."""
+
     author = UserListSerializer(read_only=True)
     project = ProjectRelatedSerializer(read_only=True)
     assigned_to = AssignableUserField(allow_null=True, required=False)

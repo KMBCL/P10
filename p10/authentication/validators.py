@@ -3,10 +3,7 @@ from django.core.exceptions import ValidationError
 
 
 class PasswordCompositionValidator:
-    """Exige au moins une lettre, un chiffre et un caractère spécial.
-
-    Django ne fournit pas ce contrôle nativement ; la longueur reste gérée par MinimumLengthValidator.
-    """
+    """Requires at least one letter, one digit and one special character."""
 
     def validate(self, password: str, user: AbstractBaseUser | None = None) -> None:
         has_letter: bool = any(char.isalpha() for char in password)
