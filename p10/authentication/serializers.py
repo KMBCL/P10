@@ -28,9 +28,11 @@ class UserRelatedField(PrimaryKeyRelatedField):
     """User relation written as a pk and read as a nested object."""
 
     def use_pk_only_optimization(self) -> bool:
+        """Disable pk-only optimization so the full user is loaded."""
         return False
 
     def to_representation(self, value: User) -> dict[str, Any]:
+        """Serialize the related user as a nested object."""
         return UserListSerializer(value).data
 
 
@@ -76,4 +78,5 @@ class UserSerializer(ModelSerializer[User]):
         return super().update(instance, validated_data)
 
     def create(self, validated_data: dict[str, Any]) -> User:
+        """Create the user with a hashed password."""
         return User.objects.create_user(**validated_data)

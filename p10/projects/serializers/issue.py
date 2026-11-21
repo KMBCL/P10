@@ -17,6 +17,7 @@ class AssignableUserField(UserRelatedField):
     }
 
     def get_queryset(self):
+        """Restrict candidates to contributors of the URL's project."""
         project_pk = self.context["view"].kwargs["project_pk"]
         return User.objects.filter(contributions__project_id=project_pk)
 

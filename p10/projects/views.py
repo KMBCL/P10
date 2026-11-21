@@ -37,6 +37,7 @@ class ProjectViewSet(ModelViewSet[Project]):
     lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
+        """Projects the user contributes to, oldest first."""
         return (
             Project.objects.filter(contributors__user=self.request.user)
             .select_related("author")
@@ -44,11 +45,13 @@ class ProjectViewSet(ModelViewSet[Project]):
         )
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
+        """Save the project and add its author as contributor, atomically."""
         with atomic():
             project = serializer.save(author=self.request.user)
             Contributor.objects.create(user=self.request.user, project=project)
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        """Require authentication, plus authorship for writes."""
         if self.action in ("update", "partial_update", "destroy"):
             return [IsAuthenticated(), IsAuthor()]
         return [IsAuthenticated()]
@@ -60,11 +63,13 @@ class IssueViewSet(ModelViewSet[Issue]):
     lookup_value_regex = r"\d+"
 
     def get_serializer_class(self) -> type[BaseSerializer[Issue]]:
+        """Use the lightweight serializer for list, the full one otherwise."""
         if self.action == "list":
             return IssueListSerializer
         return IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
+        """Issues of the URL's project if the user contributes to it, oldest first."""
         queryset = Issue.objects.filter(
             project__id=self.kwargs["project_pk"],
             project__contributors__user=self.request.user,
@@ -75,12 +80,14 @@ class IssueViewSet(ModelViewSet[Issue]):
         return queryset.order_by("created_time", "pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        """Require project membership, plus authorship for writes."""
         # update is_author
         if self.action in ("update", "partial_update", "destroy"):
             return [IsAuthenticated(), IsProjectContributor(), IsAuthor()]
         return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Issue]) -> None:
+        """Save the issue with the user as author in the URL's project."""
         serializer.save(
             author=self.request.user,
             project_id=self.kwargs["project_pk"],
@@ -93,6 +100,7 @@ class CommentViewSet(ModelViewSet[Comment]):
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
+        """Comments of the URL's issue if the user contributes to its project, oldest first."""
         return (
             Comment.objects.filter(
                 issue_id=self.kwargs["issue_pk"],
@@ -104,11 +112,13 @@ class CommentViewSet(ModelViewSet[Comment]):
         )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        """Require project membership, plus authorship for writes."""
         if self.action in ("update", "partial_update", "destroy"):
             return [IsAuthenticated(), IsProjectContributor(), IsAuthor()]
         return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Comment]) -> None:
+        """Save the comment on the URL's issue, 404 if not in the URL's project."""
         issue = get_object_or_404(
             Issue,
             pk=self.kwargs["issue_pk"],
@@ -124,6 +134,7 @@ class ContributorViewSet(ModelViewSet[Contributor]):
     http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self) -> QuerySet[Contributor, Contributor]:
+        """Contributors of the URL's project if the user contributes to it, oldest first."""
         return (
             Contributor.objects.filter(
                 project_id=self.kwargs["project_pk"],
@@ -134,6 +145,7 @@ class ContributorViewSet(ModelViewSet[Contributor]):
         )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        """Require project membership, plus project authorship for writes."""
         if self.action in ("create", "destroy"):
             return [
                 IsAuthenticated(),
@@ -143,9 +155,11 @@ class ContributorViewSet(ModelViewSet[Contributor]):
         return [IsAuthenticated(), IsProjectContributor()]
 
     def perform_create(self, serializer: BaseSerializer[Contributor]) -> None:
+        """Save the contributor in the URL's project."""
         serializer.save(project_id=self.kwargs["project_pk"])
 
     def perform_destroy(self, instance: Contributor) -> None:
+        """Remove the contributor, unless it is the project author."""
         if instance.user_id == instance.project.author_id:
             raise PermissionDenied("L'auteur du projet ne peut pas être retiré.")
         super().perform_destroy(instance)

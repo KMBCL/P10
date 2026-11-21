@@ -16,6 +16,7 @@ class IsAuthor(BasePermission):
         view: APIView,
         obj: Any,
     ) -> bool:
+        """Return True if the user is the object's author."""
         return obj.author == request.user
 
 
@@ -25,6 +26,7 @@ class IsProjectAuthor(BasePermission):
     message = "Vous devez être l'auteur du projet."
 
     def has_permission(self, request: Request, view: APIView) -> bool:
+        """Return True if the user authored the URL's project."""
         return AccessManager(request.user).is_project_author(
             view.kwargs["project_pk"]
         )
@@ -36,4 +38,5 @@ class IsProjectContributor(BasePermission):
     message = "Vous devez être contributeur du projet."
 
     def has_permission(self, request: Request, view: APIView) -> bool:
+        """Return True if the user contributes to the URL's project."""
         return AccessManager(request.user).is_contributor(view.kwargs["project_pk"])

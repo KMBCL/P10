@@ -24,6 +24,7 @@ class ContributorSerializer(ModelSerializer[Contributor]):
         read_only_fields = ["id", "project", "created_time"]
 
     def validate_user(self, user: User) -> User:
+        """Reject a user who already contributes to the project."""
         project_pk = self.context["view"].kwargs["project_pk"]
         if AccessManager(user).is_contributor(project_pk):
             raise ValidationError("Cet utilisateur est déjà contributeur du projet.")

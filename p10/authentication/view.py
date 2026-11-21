@@ -19,16 +19,19 @@ class UserViewset(ModelViewSet[User]):
     """Open sign-up, username lookup, and self-management of the user's account."""
 
     def get_serializer_class(self) -> type[BaseSerializer[User]]:
+        """Use the public serializer for list, the full one otherwise."""
         if self.action == "list":
             return UserListSerializer
         return UserSerializer
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
+        """Allow anonymous sign-up; require authentication otherwise."""
         if self.action == "create":
             return [AllowAny()]
         return [IsAuthenticated()]
 
     def get_queryset(self) -> QuerySet[User, User]:
+        """Active users: exact username match for list, the user itself otherwise."""
         queryset = User.objects.filter(is_active=True).order_by("pk")
         if self.action != "list":
             return queryset.filter(pk=self.request.user.pk)

@@ -6,6 +6,7 @@ class PasswordCompositionValidator:
     """Requires at least one letter, one digit and one special character."""
 
     def validate(self, password: str, user: AbstractBaseUser | None = None) -> None:
+        """Raise ValidationError if the password lacks a letter, digit or special char."""
         has_letter: bool = any(char.isalpha() for char in password)
         has_digit: bool = any(char.isdigit() for char in password)
         has_special: bool = any(not char.isalnum() for char in password)
@@ -16,4 +17,5 @@ class PasswordCompositionValidator:
             )
 
     def get_help_text(self) -> str:
+        """Return the password composition requirement message."""
         return 'Le mot de passe doit contenir au moins une lettre, un chiffre et un caractère spécial.'
