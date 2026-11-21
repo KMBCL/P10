@@ -9,18 +9,14 @@ from authentication.serializers import UserListSerializer
 class ProjectRelatedSerializer(ModelSerializer[Project]):
     """Minimal project representation for nesting in other resources."""
 
-    author = UserListSerializer(read_only=True)
-
     class Meta:
         model = Project
         fields = [
             "id",
-            "author",
             "name",
         ]
         read_only_fields = [
             "id",
-            "author",
         ]
 
 

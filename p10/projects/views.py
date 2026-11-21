@@ -77,7 +77,7 @@ class IssueViewSet(ModelViewSet[Issue]):
             project__contributors__user=self.request.user,
         ).select_related("author", "assigned_to")
         if self.action != "list":
-            queryset = queryset.select_related("project__author")
+            queryset = queryset.select_related("project")
         return queryset.order_by("-pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
