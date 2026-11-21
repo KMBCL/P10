@@ -1,3 +1,5 @@
+"""Serializers for projects."""
+
 from rest_framework.serializers import ModelSerializer
 
 from projects.models import Project

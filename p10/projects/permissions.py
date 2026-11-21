@@ -1,3 +1,5 @@
+"""DRF permission classes for project resources."""
+
 from typing import Any
 
 from rest_framework.permissions import BasePermission

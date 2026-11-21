@@ -1,3 +1,5 @@
+"""Serializers and related fields for the User model."""
+
 from typing import Any
 
 from rest_framework.serializers import (

@@ -1,3 +1,5 @@
+"""Django admin registration for the custom User model."""
+
 from typing import Any
 
 from django.contrib import admin

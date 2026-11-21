@@ -1,3 +1,5 @@
+"""Custom password validators."""
+
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.exceptions import ValidationError
 

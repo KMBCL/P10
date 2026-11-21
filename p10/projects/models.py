@@ -1,3 +1,5 @@
+"""Models for projects, issues, comments and contributors."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -1,3 +1,5 @@
+"""Serializer for project contributors."""
+
 from __future__ import annotations
 
 from rest_framework.serializers import ModelSerializer, ValidationError

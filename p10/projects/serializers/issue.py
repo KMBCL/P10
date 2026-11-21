@@ -1,3 +1,5 @@
+"""Serializers and fields for issues."""
+
 from __future__ import annotations
 
 from rest_framework.serializers import ModelSerializer

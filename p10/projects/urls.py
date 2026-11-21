@@ -1,3 +1,5 @@
+"""Nested URL routes for projects, contributors, issues and comments."""
+
 from rest_framework_nested import routers
 
 from projects.views import (

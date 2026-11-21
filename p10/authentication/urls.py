@@ -1,3 +1,5 @@
+"""URL routes for the user endpoints."""
+
 from rest_framework.routers import SimpleRouter
 
 from authentication.view import UserViewset

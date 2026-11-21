@@ -1,3 +1,5 @@
+"""API viewsets for projects, issues, comments and contributors."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
