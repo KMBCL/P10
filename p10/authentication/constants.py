@@ -1,3 +1,3 @@
 """Constants for the authentication app."""
 
-MIN_ALLOWED_AGE = 16
+MIN_ALLOWED_AGE = 15
