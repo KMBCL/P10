@@ -118,7 +118,7 @@ class Comment(models.Model):
     )
     description: models.TextField[str, str] = models.TextField()
     created_time: models.DateTimeField[datetime, datetime] = models.DateTimeField(
-        auto_now_add=True
+        auto_now_add=True, db_index=True
     )
 
 

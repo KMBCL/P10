@@ -39,11 +39,11 @@ class ProjectViewSet(ModelViewSet[Project]):
     lookup_value_regex = r"\d+"
 
     def get_queryset(self) -> QuerySet[Project, Project]:
-        """Projects the user contributes to, oldest first."""
+        """Projects the user contributes to, newest first."""
         return (
             Project.objects.filter(contributors__user=self.request.user)
             .select_related("author")
-            .order_by("created_time", "pk")
+            .order_by("-pk")
         )
 
     def perform_create(self, serializer: BaseSerializer[Project]) -> None:
@@ -71,15 +71,14 @@ class IssueViewSet(ModelViewSet[Issue]):
         return IssueSerializer
 
     def get_queryset(self) -> QuerySet[Issue, Issue]:
-        """Issues of the URL's project if the user contributes to it, oldest first."""
+        """Issues of the URL's project if the user contributes to it, newest first."""
         queryset = Issue.objects.filter(
             project__id=self.kwargs["project_pk"],
             project__contributors__user=self.request.user,
         ).select_related("author", "assigned_to")
         if self.action != "list":
             queryset = queryset.select_related("project__author")
-        # indexer created_time côté base
-        return queryset.order_by("created_time", "pk")
+        return queryset.order_by("-pk")
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
         """Require project membership, plus authorship for writes."""
@@ -102,7 +101,7 @@ class CommentViewSet(ModelViewSet[Comment]):
     serializer_class = CommentSerializer
 
     def get_queryset(self) -> QuerySet[Comment, Comment]:
-        """Comments of the URL's issue if the user contributes to its project, oldest first."""
+        """Comments of the URL's issue if the user contributes to its project, newest first."""
         return (
             Comment.objects.filter(
                 issue_id=self.kwargs["issue_pk"],
@@ -110,7 +109,7 @@ class CommentViewSet(ModelViewSet[Comment]):
                 issue__project__contributors__user=self.request.user,
             )
             .select_related("author")
-            .order_by("created_time", "pk")
+            .order_by("-created_time")
         )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
@@ -136,14 +135,14 @@ class ContributorViewSet(ModelViewSet[Contributor]):
     http_method_names = ["get", "post", "delete", "head", "options"]
 
     def get_queryset(self) -> QuerySet[Contributor, Contributor]:
-        """Contributors of the URL's project if the user contributes to it, oldest first."""
+        """Contributors of the URL's project if the user contributes to it, newest first."""
         return (
             Contributor.objects.filter(
                 project_id=self.kwargs["project_pk"],
                 project__contributors__user=self.request.user,
             )
             .select_related("user")
-            .order_by("created_time", "pk")
+            .order_by("-pk")
         )
 
     def get_permissions(self) -> Sequence[_SupportsHasPermission]:
