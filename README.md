@@ -129,10 +129,24 @@ Le token d'accès expire après 5 minutes ; le renouveler via `POST /api/token/r
 
 Seuls les contributeurs d'un projet accèdent à ses ressources ; seul l'auteur d'une ressource peut la modifier ou la supprimer. Les listes sont paginées par 10 (`?page=N`).
 
+Supprimer un projet supprime ses issues et leurs commentaires.
+
+## Suppression de compte (RGPD)
+
+`DELETE /api/user/{id}/` supprime le compte et ses participations aux projets. Les projets, issues et commentaires de l'utilisateur sont conservés mais anonymisés (`author` à `null`), et les issues qui lui étaient assignées passent à `assigned_to: null`. Une suppression en cascade détruirait le travail des autres contributeurs (leurs issues et commentaires dans ces projets).
+
+Un contenu anonymisé reste lisible par les contributeurs mais n'est plus modifiable par personne. Limite connue : un projet dont l'auteur a supprimé son compte ne peut plus être modifié, supprimé, ni voir ses contributeurs gérés ; un transfert de propriété reste à prévoir.
+
 ## Qualité
 
 Depuis la racine, avec les dépendances de développement :
 
 ```
 flake8
+```
+
+Tests automatisés, depuis `p10/` :
+
+```
+python manage.py test -v 2
 ```

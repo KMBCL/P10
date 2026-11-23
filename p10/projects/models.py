@@ -24,10 +24,12 @@ class Project(models.Model):
         IOS = ("IOS", "iOS")
         ANDROID = "ANDROID", "Android"
 
-    author: models.ForeignKey[User, User] = models.ForeignKey(
+    # SET_NULL : supprimer un compte ne détruit pas le travail des autres contributeurs.
+    author: models.ForeignKey[User | None, User | None] = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="projects",
+        null=True,
     )
     name: models.CharField[str, str] = models.CharField(max_length=150)
     description: models.TextField[str, str] = models.TextField()
@@ -65,10 +67,11 @@ class Issue(models.Model):
         FINISHED = "FINISHED", "Terminée"
         IN_PROGRESS = "IN_PROGRESS", "EN cours"
 
-    author: models.ForeignKey[User, User] = models.ForeignKey(
+    author: models.ForeignKey[User | None, User | None] = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="issues",
+        null=True,
     )
     project: models.ForeignKey[Project, Project] = models.ForeignKey(
         to=Project, on_delete=models.CASCADE, related_name="issues"
@@ -108,10 +111,11 @@ class Comment(models.Model):
     id: models.UUIDField[UUID, UUID] = models.UUIDField(
         primary_key=True, default=uuid4, editable=False
     )
-    author: models.ForeignKey[User, User] = models.ForeignKey(
+    author: models.ForeignKey[User | None, User | None] = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="comments",
+        null=True,
     )
     issue: models.ForeignKey[Issue, Issue] = models.ForeignKey(
         to=Issue, on_delete=models.CASCADE, related_name="comments"
